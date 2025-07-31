@@ -13,70 +13,53 @@ export async function POST(request) {
       )
     }
 
-    // Check if email already exists for CreatorOS
-    const { data: existingUser } = await supabase
-      .from('waitlist')
-      .select('email')
-      .eq('email', email)
-      .eq('product', 'creatoros')
-      .single()
-
-    if (existingUser) {
-      return Response.json(
-        { error: 'Email already registered for CreatorOS' },
-        { status: 409 }
-      )
-    }
-
-    // Insert new waitlist entry with product namespace
-    const { data, error } = await supabase
-      .from('waitlist')
+    // Insert the record into the creatoros_waitlist table
+    const insertResult = await supabase
+      .from('creatoros_waitlist')
       .insert([
         {
-          product: 'creatoros',
           name,
           email,
           creator_type: creatorType,
           platforms: platforms || [],
           followers,
-          created_at: new Date().toISOString(),
-          status: 'active',
-          metadata: {
-            source: 'landing_page',
-            user_agent: request.headers.get('user-agent'),
-            referrer: request.headers.get('referer')
-          }
+          status: 'active'
         }
       ])
       .select()
 
-    if (error) {
-      console.error('Supabase error:', error)
+    // Check for duplicate email
+    if (insertResult.error && insertResult.error.code === '23505') {
       return Response.json(
-        { error: 'Failed to save to waitlist' },
+        { error: 'Email already registered' },
+        { status: 409 }
+      )
+    }
+
+    if (insertResult.error) {
+      console.error('Supabase error:', insertResult.error)
+      return Response.json(
+        { error: 'Failed to save to waitlist', details: insertResult.error.message },
         { status: 500 }
       )
     }
 
-    // Get current waitlist position for CreatorOS specifically
+    // Get current waitlist position
     const { count } = await supabase
-      .from('waitlist')
+      .from('creatoros_waitlist')
       .select('*', { count: 'exact', head: true })
-      .eq('product', 'creatoros')
-      .eq('status', 'active')
 
     return Response.json({
       success: true,
-      message: 'Successfully added to CreatorOS waitlist',
-      position: count,
-      product: 'creatoros',
-      data: data[0]
+      message: 'Successfully added to waitlist',
+      position: count || 1,
+      data: insertResult.data[0]
     })
 
   } catch (error) {
     console.error('API error:', error)
     return Response.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }
