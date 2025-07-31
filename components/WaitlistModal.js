@@ -79,13 +79,13 @@ export default function WaitlistModal({ isOpen, onClose }) {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">You're on the list! 🎉</h2>
+          <h2 className="text-2xl font-bold mb-2">You&apos;re on the list! 🎉</h2>
           <p className="text-gray-600 mb-6">
-            Thanks for joining! You're #1,248 on the waitlist. We'll notify you as soon as CreatorOS launches.
+            Thanks for joining! You&apos;re #1,248 on the waitlist. We&apos;ll notify you as soon as CreatorOS launches.
           </p>
           <div className="bg-gradient-to-r from-creator-purple/10 to-creator-pink/10 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">🎁 Early Bird Bonus</p>
-            <p className="text-sm text-gray-600">Get 3 months free when you're among the first 1,000 users!</p>
+            <p className="text-sm text-gray-600">Get 3 months free when you&apos;re among the first 1,000 users!</p>
           </div>
           <button
             onClick={onClose}
