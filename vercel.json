@@ -1,0 +1,6 @@
+{
+  "env": {
+    "SUPABASE_SUBDOMAIN": "acfzoopxhmopnqfzedrk",
+    "SUPABASE_SERVICE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjZnpvb3B4aG1vcG5xZnplZHJrIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1Mzk4NzA4MCwiZXhwIjoyMDY5NTYzMDgwfQ.pcCtZua0WS0ux4Zf1DpaI-f04oecZ1JeYuJNLCmhC3I"
+  }
+}

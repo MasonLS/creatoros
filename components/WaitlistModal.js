@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Check, Mail, User, Briefcase } from 'lucide-react';
+import { X, Check, Mail, User, Briefcase, AlertCircle } from 'lucide-react';
 
 export default function WaitlistModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -11,6 +11,8 @@ export default function WaitlistModal({ isOpen, onClose }) {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [waitlistPosition, setWaitlistPosition] = useState(null);
 
   if (!isOpen) return null;
 
@@ -46,21 +48,30 @@ export default function WaitlistModal({ isOpen, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError('');
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Store in localStorage for demo purposes
-    const waitlistData = JSON.parse(localStorage.getItem('creatoros-waitlist') || '[]');
-    waitlistData.push({
-      ...formData,
-      timestamp: new Date().toISOString(),
-      id: Date.now()
-    });
-    localStorage.setItem('creatoros-waitlist', JSON.stringify(waitlistData));
-    
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to join waitlist');
+      }
+
+      setWaitlistPosition(result.position);
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePlatformToggle = (platform) => {
@@ -81,7 +92,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
           </div>
           <h2 className="text-2xl font-bold mb-2">You&apos;re on the list! 🎉</h2>
           <p className="text-gray-600 mb-6">
-            Thanks for joining! You&apos;re #1,248 on the waitlist. We&apos;ll notify you as soon as CreatorOS launches.
+            Thanks for joining! You&apos;re #{waitlistPosition} on the waitlist. We&apos;ll notify you as soon as CreatorOS launches.
           </p>
           <div className="bg-gradient-to-r from-creator-purple/10 to-creator-pink/10 rounded-lg p-4 mb-6">
             <p className="text-sm font-medium">🎁 Early Bird Bonus</p>
@@ -115,13 +126,21 @@ export default function WaitlistModal({ isOpen, onClose }) {
           </button>
         </div>
 
+        {/* Error Message */}
+        {error && (
+          <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        )}
+
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <User className="w-4 h-4 inline mr-2" />
-              Full Name
+              Full Name *
             </label>
             <input
               type="text"
@@ -137,7 +156,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Mail className="w-4 h-4 inline mr-2" />
-              Email Address
+              Email Address *
             </label>
             <input
               type="email"
@@ -153,7 +172,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Briefcase className="w-4 h-4 inline mr-2" />
-              What type of creator are you?
+              What type of creator are you? *
             </label>
             <select
               required
@@ -194,7 +213,7 @@ export default function WaitlistModal({ isOpen, onClose }) {
           {/* Followers */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Total followers across all platforms
+              Total followers across all platforms *
             </label>
             <select
               required
